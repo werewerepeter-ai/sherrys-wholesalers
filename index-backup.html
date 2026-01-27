@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sherry's Wholesalers | Home Appliances & Household</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandGold: '#f5b301',
+            brandBlue: '#1e40af'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+    
+    /* Featured products slider */
+    .featured-scroll {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 1rem;
+      scrollbar-width: none;
+    }
+    .featured-scroll::-webkit-scrollbar { display: none; }
+    .featured-scroll > div { scroll-snap-align: start; }
+
+    /* Discount badge animation */
+    .discount-badge {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
+  <div class="text-center">
+    <div class="inline-block relative w-20 h-20">
+      <div class="absolute border-4 border-brandGold border-t-transparent rounded-full w-20 h-20 animate-spin"></div>
+    </div>
+    <p class="mt-4 text-brandBlue font-semibold">Loading...</p>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<header class="bg-white shadow sticky top-0 z-50">
+  <!-- Top Bar -->
+  <div class="bg-brandBlue text-white py-1">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between text-xs">
+      <span>📞 +254 710 553 678</span>
+      <span>🏢 Nairobi CBD</span>
+    </div>
+  </div>
+
+  <!-- Main Navbar -->
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+    
+    <a href="index.html">
+      <img src="images/logo.png" alt="Sherry's Wholesalers" class="h-10">
+    </a>
+
+    <input
+      id="search-input-home"
+      type="text"
+      placeholder="Search products, brands and categories"
+      class="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+    />
+
+    <!-- Help Tab -->
+    <a href="help.html" class="hidden md:flex items-center gap-1 text-sm hover:text-brandGold">
+      ❓ Help
+    </a>
+
+    <!-- Sign In -->
+    <button id="sign-in-btn" class="hidden md:flex items-center gap-1 text-sm hover:text-brandGold">
+      👤 Sign In
+    </button>
+
+    <!-- Cart -->
+    <a href="cart.html" class="relative">
+      🛒
+      <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1 rounded">0</span>
+    </a>
+
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="md:hidden text-2xl">☰</button>
+  </div>
+
+  <!-- Secondary Navigation -->
+  <div class="bg-gray-50 border-t">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex gap-6 text-sm overflow-x-auto">
+      <a href="index.html" class="whitespace-nowrap hover:text-brandGold">🏠 Home</a>
+      <a href="deals.html" class="whitespace-nowrap hover:text-brandGold font-semibold text-red-600">🔥 Today's Deals</a>
+      <a href="category.html?category=Home%20Appliances" class="whitespace-nowrap hover:text-brandGold">Home Appliances</a>
+      <a href="category.html?category=Kitchen" class="whitespace-nowrap hover:text-brandGold">Kitchen</a>
+      <a href="category.html?category=Bedroom" class="whitespace-nowrap hover:text-brandGold">Bedroom</a>
+      <a href="category.html?category=Living%20Room" class="whitespace-nowrap hover:text-brandGold">Living Room</a>
+    </div>
+  </div>
+</header>
+
+<!-- SIGN IN MODAL -->
+<div id="sign-in-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+    <button id="close-sign-in" class="absolute top-4 right-4 text-2xl hover:text-red-600">✕</button>
+    
+    <h2 class="text-2xl font-bold mb-6 text-center">Welcome Back!</h2>
+    
+    <form id="sign-in-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Phone Number</label>
+        <input 
+          type="tel" 
+          placeholder="+254 700 000 000" 
+          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+          required
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Password</label>
+        <input 
+          type="password" 
+          placeholder="Enter your password" 
+          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+          required
+        />
+      </div>
+      
+      <button type="submit" class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition">
+        Sign In
+      </button>
+    </form>
+    
+    <p class="text-center text-sm mt-4 text-gray-600">
+      Don't have an account? <a href="#" class="text-brandBlue hover:underline">Create one</a>
+    </p>
+  </div>
+</div>
+
+<!-- Mobile Menu Overlay -->
+<div id="mobile-menu" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+  <div class="bg-white w-64 h-full p-6 shadow-lg">
+    <button id="close-menu" class="text-2xl mb-6">✕</button>
+    <h3 class="font-bold mb-4">Categories</h3>
+    <ul class="space-y-3">
+      <li><a href="category.html?category=Home%20Appliances" class="block hover:text-brandGold">Home Appliances</a></li>
+      <li><a href="category.html?category=Kitchen" class="block hover:text-brandGold">Kitchen</a></li>
+      <li><a href="category.html?category=Bedroom" class="block hover:text-brandGold">Bedroom</a></li>
+      <li><a href="category.html?category=Living%20Room" class="block hover:text-brandGold">Living Room</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- HERO BANNER -->
+<section class="bg-gradient-to-r from-brandBlue to-blue-700 text-white py-12">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h1 class="text-4xl font-bold mb-2">Welcome to Sherry's Wholesalers</h1>
+    <p class="text-lg">Your trusted home appliances & household partner in Nairobi CBD</p>
+    <p class="mt-4 text-sm">📞 +254 710 553 678 | 🏢 Nairobi CBD</p>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+
+  <!-- CATEGORIES SIDEBAR -->
+  <aside class="bg-white p-4 rounded shadow h-fit">
+    <h3 class="font-bold mb-3">Categories</h3>
+    <ul class="space-y-2 text-sm">
+      <li><a href="category.html?category=Home%20Appliances" class="hover:text-brandGold block">🏠 Home Appliances</a></li>
+      <li><a href="category.html?category=Kitchen" class="hover:text-brandGold block">🍳 Kitchen</a></li>
+      <li><a href="category.html?category=Bedroom" class="hover:text-brandGold block">🛏️ Bedroom</a></li>
+      <li><a href="category.html?category=Living%20Room" class="hover:text-brandGold block">🛋️ Living Room</a></li>
+    </ul>
+  </aside>
+
+  <!-- PRODUCTS SECTION -->
+  <section class="md:col-span-3">
+    
+    <!-- Featured Deals -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold mb-4">🔥 Featured Deals</h2>
+      <div id="featured-products" class="featured-scroll pb-4"></div>
+    </div>
+
+    <!-- All Products -->
+    <h2 class="text-xl font-bold mb-4">Top Deals</h2>
+    <div id="products" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  </section>
+
+</main>
+
+<!-- BACK TO TOP BUTTON -->
+<button id="back-to-top" class="hidden fixed bottom-6 right-6 bg-brandGold text-white p-3 rounded-full shadow-lg hover:bg-yellow-600 transition">
+  ↑
+</button>
+
+<!-- FOOTER -->
+<footer class="bg-white mt-10 p-6 text-center text-sm text-gray-600 border-t">
+  <p class="font-bold text-lg mb-2">Sherry's Wholesalers</p>
+  <p>📍 Nairobi CBD</p>
+  <p>📞 +254 710 553 678</p>
+  <p class="mt-4 text-xs">© 2026 Sherry's Wholesalers. All rights reserved.</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+
+<script>
+  const container = document.getElementById("products");
+  const featuredContainer = document.getElementById("featured-products");
+
+  // Calculate discount percentage
+  function getDiscount(oldPrice, newPrice) {
+    return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+  }
+
+  // Display featured products (top 6 deals)
+  const featuredProducts = products
+    .sort((a, b) => getDiscount(b.oldPrice, b.price) - getDiscount(a.oldPrice, a.price))
+    .slice(0, 6);
+
+  featuredProducts.forEach(p => {
+    const discount = getDiscount(p.oldPrice, p.price);
+    featuredContainer.innerHTML += `
+      <div class="bg-white p-4 rounded shadow hover:shadow-lg transition min-w-[200px] relative">
+        <span class="discount-badge absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+          -${discount}%
+        </span>
+        <img src="${p.image}" class="h-32 w-full object-cover mb-2 rounded">
+        <h3 class="text-sm font-semibold line-clamp-2">${p.name}</h3>
+        <p class="text-brandBlue font-bold mt-2">KSh ${p.price.toLocaleString()}</p>
+        <p class="text-xs line-through text-gray-400">KSh ${p.oldPrice.toLocaleString()}</p>
+        <button 
+          onclick='addToCart(${JSON.stringify(p)})' 
+          class="mt-2 w-full bg-brandGold text-white py-1 rounded hover:bg-yellow-600 transition text-sm"
+        >
+          Add to Cart
+        </button>
+      </div>
+    `;
+  });
+
+  // Display regular products
+  products.slice(0, 12).forEach(p => {
+    const discount = getDiscount(p.oldPrice, p.price);
+    container.innerHTML += `
+      <div class="bg-white p-3 rounded shadow hover:shadow-lg transition relative">
+        <span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+          -${discount}%
+        </span>
+        <img src="${p.image}" class="h-32 w-full object-cover mb-2 rounded">
+        <h3 class="text-sm font-semibold">${p.name}</h3>
+        <p class="text-brandBlue font-bold">KSh ${p.price.toLocaleString()}</p>
+        <p class="text-xs line-through text-gray-400">KSh ${p.oldPrice.toLocaleString()}</p>
+        <button 
+          onclick='addToCart(${JSON.stringify(p)})' 
+          class="mt-2 w-full bg-brandGold text-white py-1 rounded hover:bg-yellow-600 transition"
+        >
+          Add to Cart
+        </button>
+      </div>
+    `;
+  });
+
+  updateCartCount();
+
+  // Search functionality
+  document.getElementById('search-input-home').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const query = e.target.value.trim();
+      if (query) {
+        window.location.href = `category.html?search=${encodeURIComponent(query)}`;
+      }
+    }
+  });
+
+  // Mobile menu
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const closeMenu = document.getElementById('close-menu');
+
+  if (mobileMenuBtn && mobileMenu && closeMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.remove('hidden');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+    });
+
+    mobileMenu.addEventListener('click', (e) => {
+      if (e.target === mobileMenu) {
+        mobileMenu.classList.add('hidden');
+      }
+    });
+  }
+
+  // Back to top button
+  const backToTop = document.getElementById('back-to-top');
+  if (backToTop) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTop.classList.remove('hidden');
+      } else {
+        backToTop.classList.add('hidden');
+      }
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // Sign In Modal
+  const signInBtn = document.getElementById('sign-in-btn');
+  const signInModal = document.getElementById('sign-in-modal');
+  const closeSignIn = document.getElementById('close-sign-in');
+  const signInForm = document.getElementById('sign-in-form');
+
+  if (signInBtn && signInModal && closeSignIn && signInForm) {
+    signInBtn.addEventListener('click', () => {
+      signInModal.classList.remove('hidden');
+    });
+
+    closeSignIn.addEventListener('click', () => {
+      signInModal.classList.add('hidden');
+    });
+
+    signInModal.addEventListener('click', (e) => {
+      if (e.target === signInModal) {
+        signInModal.classList.add('hidden');
+      }
+    });
+
+    signInForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Sign in feature coming soon! For now, browse and order via WhatsApp.');
+      signInModal.classList.add('hidden');
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Products | Sherry's Wholesalers</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandGold: '#f5b301',
+            brandBlue: '#1e40af'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<header class="bg-white shadow sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+    
+    <a href="index.html">
+      <img src="images/logo.png" alt="Sherry's Wholesalers" class="h-10">
+    </a>
+
+    <input
+      id="search-input"
+      type="text"
+      placeholder="Search products, brands and categories"
+      class="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+    />
+
+    <a href="cart.html" class="relative">
+      🛒
+      <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1 rounded">0</span>
+    </a>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+
+  <!-- SIDEBAR -->
+  <aside class="bg-white p-4 rounded shadow h-fit">
+    
+    <!-- Categories -->
+    <h3 class="font-bold mb-3">Categories</h3>
+    <ul class="space-y-2 text-sm mb-6">
+      <li><a href="category.html?category=Home%20Appliances" class="hover:text-brandGold block">Home Appliances</a></li>
+      <li><a href="category.html?category=Kitchen" class="hover:text-brandGold block">Kitchen</a></li>
+      <li><a href="category.html?category=Bedroom" class="hover:text-brandGold block">Bedroom</a></li>
+      <li><a href="category.html?category=Living%20Room" class="hover:text-brandGold block">Living Room</a></li>
+    </ul>
+
+    <!-- Subcategories (dynamically populated) -->
+    <div id="subcategories"></div>
+
+    <!-- Sort -->
+    <h3 class="font-bold mb-3 mt-6">Sort By</h3>
+    <select id="sort-select" class="w-full border rounded px-2 py-1 text-sm">
+      <option value="">Default</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="name">Name: A to Z</option>
+    </select>
+
+  </aside>
+
+  <!-- PRODUCTS -->
+  <section class="md:col-span-3">
+    
+    <div class="mb-4">
+      <h1 id="page-title" class="text-2xl font-bold">All Products</h1>
+      <p id="product-count" class="text-sm text-gray-600 mt-1"></p>
+    </div>
+
+    <div id="products" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+
+    <div id="no-results" class="hidden text-center py-12">
+      <p class="text-gray-500 text-lg">No products found</p>
+      <a href="index.html" class="text-brandBlue hover:underline mt-2 inline-block">← Back to Home</a>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-white mt-10 p-4 text-center text-sm text-gray-600">
+  <p><strong>Sherry's Wholesalers</strong> – Nairobi CBD</p>
+  <p>📞 +254 710 553 678</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/category.js"></script>
+
+</body>
+</html>

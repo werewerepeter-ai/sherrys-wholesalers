@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | Sherry's Wholesalers</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandGold: '#f5b301',
+            brandBlue: '#1e40af'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8">
+    <div class="text-center mb-6">
+      <img src="images/logo.png" alt="Logo" class="h-16 mx-auto mb-4">
+      <h1 class="text-2xl font-bold text-brandBlue">Admin Dashboard</h1>
+      <p class="text-sm text-gray-600">Sherry's Wholesalers</p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Username</label>
+        <input 
+          type="text" 
+          id="admin-username"
+          placeholder="Enter username" 
+          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Password</label>
+        <input 
+          type="password" 
+          id="admin-password"
+          placeholder="Enter password" 
+          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+        />
+      </div>
+      
+      <button 
+        id="login-btn"
+        class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition"
+      >
+        Login
+      </button>
+
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <p class="text-xs text-blue-800 text-center">
+          <strong>Default Login:</strong><br>
+          Username: admin<br>
+          Password: admin123
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard" class="hidden min-h-screen">
+  
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="images/logo.png" alt="Logo" class="h-10">
+        <div>
+          <h1 class="text-xl font-bold text-brandBlue">Admin Dashboard</h1>
+          <p class="text-xs text-gray-600">Manage your products</p>
+        </div>
+      </div>
+      <button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex gap-6 text-sm">
+        <button class="tab-btn active py-3 border-b-2 border-brandGold font-semibold" data-tab="products">
+          📦 Products (<span id="product-count">0</span>)
+        </button>
+        <button class="tab-btn py-3 hover:text-brandGold" data-tab="add-product">
+          ➕ Add Product
+        </button>
+        <button class="tab-btn py-3 hover:text-brandGold" data-tab="categories">
+          📂 Categories
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <main class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- PRODUCTS TAB -->
+    <div id="products-tab" class="tab-content">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">All Products</h2>
+          <div class="flex gap-3">
+            <input 
+              type="text" 
+              id="search-products" 
+              placeholder="Search products..." 
+              class="border rounded px-4 py-2 text-sm"
+            />
+            <select id="filter-category" class="border rounded px-4 py-2 text-sm">
+              <option value="">All Categories</option>
+              <option value="Home Appliances">Home Appliances</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Bedroom">Bedroom</option>
+              <option value="Living Room">Living Room</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Image</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Category</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Price</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Details</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body">
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-gray-500">Loading products...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD PRODUCT TAB -->
+    <div id="add-product-tab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow p-6 max-w-4xl">
+        <h2 class="text-2xl font-bold mb-6">Add New Product</h2>
+
+        <form id="add-product-form" class="space-y-6">
+          
+          <!-- Basic Info -->
+          <div class="border-b pb-6">
+            <h3 class="font-bold text-lg mb-4">Basic Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-1">Product Name *</label>
+                <input 
+                  type="text" 
+                  id="new-name"
+                  class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold mb-1">Category *</label>
+                <select 
+                  id="new-category"
+                  class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="Home Appliances">Home Appliances</option>
+                  <option value="Kitchen">Kitchen</option>
+                  <option value="Bedroom">Bedroom</option>
+                  <option value="Living Room">Living Room</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label class="block text-sm font-semibold mb-1">Subcategory *</label>
+              <input 
+                type="text" 
+                id="new-subcategory"
+                placeholder="e.g., Refrigerators, Sofas, etc."
+                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                required
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-semibold mb-1">Current Price (KSh) *</label>
+                <input 
+                  type="number" 
+                  id="new-price"
+                  class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold mb-1">Old Price (KSh) *</label>
+                <input 
+                  type="number" 
+                  id="new-oldPrice"
+                  class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label class="block text-sm font-semibold mb-1">Image URL *</label>
+              <input 
+                type="url" 
+                id="new-image"
+                placeholder="https://example.com/image.jpg"
+                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+                required
+              />
+              <p class="text-xs text-gray-500 mt-1">Tip: Upload to Imgur or use Unsplash links</p>
+            </div>
+          </div>
+
+          <!-- Product Details -->
+          <div class="border-b pb-6">
+            <h3 class="font-bold text-lg mb-4">Product Details (Optional)</h3>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-semibold mb-1">Description</label>
+              <textarea 
+                id="new-description"
+                rows="4"
+                placeholder="Detailed product description..."
+                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+              ></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
+              <textarea 
+                id="new-features"
+                rows="6"
+                placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold font-mono text-sm"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Specifications -->
+          <div class="pb-6">
+            <h3 class="font-bold text-lg mb-4">Specifications (Optional)</h3>
+            
+            <div id="specs-container" class="space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Spec name (e.g., Capacity)" class="spec-name border rounded px-4 py-2 text-sm" />
+                <input type="text" placeholder="Spec value (e.g., 380 Liters)" class="spec-value border rounded px-4 py-2 text-sm" />
+              </div>
+            </div>
+            
+            <button type="button" id="add-spec-btn" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+              + Add Specification
+            </button>
+          </div>
+
+          <button type="submit" class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition">
+            Add Product
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- CATEGORIES TAB -->
+    <div id="categories-tab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold mb-6">Product Categories</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="categories-grid">
+          <div class="bg-gray-50 p-4 rounded text-center">
+            <p class="text-gray-500">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 my-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold">Edit Product</h2>
+      <button id="close-edit-modal" class="text-2xl hover:text-red-600">✕</button>
+    </div>
+
+    <form id="edit-product-form" class="space-y-6">
+      <input type="hidden" id="edit-product-id">
+
+      <!-- Basic Info -->
+      <div class="border-b pb-6">
+        <h3 class="font-bold text-lg mb-4">Basic Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold mb-1">Product Name</label>
+            <input type="text" id="edit-name" class="w-full border rounded px-4 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-1">Category</label>
+            <select id="edit-category" class="w-full border rounded px-4 py-2" required>
+              <option value="Home Appliances">Home Appliances</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Bedroom">Bedroom</option>
+              <option value="Living Room">Living Room</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm font-semibold mb-1">Subcategory</label>
+          <input type="text" id="edit-subcategory" class="w-full border rounded px-4 py-2" required />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="block text-sm font-semibold mb-1">Current Price</label>
+            <input type="number" id="edit-price" class="w-full border rounded px-4 py-2" required />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-1">Old Price</label>
+            <input type="number" id="edit-oldPrice" class="w-full border rounded px-4 py-2" required />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm font-semibold mb-1">Image URL</label>
+          <input type="url" id="edit-image" class="w-full border rounded px-4 py-2" required />
+        </div>
+      </div>
+
+      <!-- Product Details -->
+      <div class="border-b pb-6">
+        <h3 class="font-bold text-lg mb-4">Product Details</h3>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-1">Description</label>
+          <textarea 
+            id="edit-description"
+            rows="4"
+            class="w-full border rounded px-4 py-2"
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
+          <textarea 
+            id="edit-features"
+            rows="6"
+            class="w-full border rounded px-4 py-2 font-mono text-sm"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Specifications -->
+      <div class="pb-6">
+        <h3 class="font-bold text-lg mb-4">Specifications</h3>
+        
+        <div id="edit-specs-container" class="space-y-3"></div>
+        
+        <button type="button" id="edit-add-spec-btn" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+          + Add Specification
+        </button>
+      </div>
+
+      <button type="submit" class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition">
+        Update Product
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

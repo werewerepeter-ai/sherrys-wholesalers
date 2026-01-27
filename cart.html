@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shopping Cart | Sherry's Wholesalers</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandGold: '#f5b301',
+            brandBlue: '#1e40af'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<header class="bg-white shadow sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+    
+    <a href="index.html">
+      <img src="images/logo.png" alt="Sherry's Wholesalers" class="h-10">
+    </a>
+
+    <input
+      type="text"
+      placeholder="Search products, brands and categories"
+      class="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
+    />
+
+    <a href="cart.html" class="relative">
+      🛒
+      <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1 rounded">0</span>
+    </a>
+  </div>
+</header>
+
+<!-- CART CONTENT -->
+<main class="max-w-4xl mx-auto px-4 mt-8">
+  
+  <h1 class="text-2xl font-bold mb-6">Your Shopping Cart</h1>
+
+  <div id="cart-items" class="bg-white rounded shadow p-6 mb-6">
+    <!-- Cart items will appear here -->
+  </div>
+
+  <div class="bg-white rounded shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+      <span class="text-lg font-semibold">Total:</span>
+      <span id="cart-total" class="text-2xl font-bold text-brandBlue">KSh 0</span>
+    </div>
+
+    <button 
+      id="whatsapp-checkout" 
+      class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition"
+    >
+      📱 Checkout via WhatsApp
+    </button>
+
+    <a href="index.html" class="block text-center mt-4 text-brandBlue hover:underline">
+      ← Continue Shopping
+    </a>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-white mt-10 p-4 text-center text-sm text-gray-600">
+  <p><strong>Sherry's Wholesalers</strong> – Nairobi CBD</p>
+  <p>📞 +254 710 553 678</p>
+</footer>
+
+<script src="js/cart.js"></script>
+</body>
+</html>
