@@ -81,7 +81,7 @@
         <img src="images/logo.png" alt="Logo" class="h-10">
         <div>
           <h1 class="text-xl font-bold text-brandBlue">Admin Dashboard</h1>
-          <p class="text-xs text-gray-600">Manage your products</p>
+          <p class="text-xs text-gray-600">Backend API Connected ✓</p>
         </div>
       </div>
       <button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">
@@ -124,10 +124,6 @@
             />
             <select id="filter-category" class="border rounded px-4 py-2 text-sm">
               <option value="">All Categories</option>
-              <option value="Home Appliances">Home Appliances</option>
-              <option value="Kitchen">Kitchen</option>
-              <option value="Bedroom">Bedroom</option>
-              <option value="Living Room">Living Room</option>
             </select>
           </div>
         </div>
@@ -141,13 +137,12 @@
                 <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Category</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Price</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold">Details</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody id="products-table-body">
               <tr>
-                <td colspan="7" class="px-4 py-8 text-center text-gray-500">Loading products...</td>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading products...</td>
               </tr>
             </tbody>
           </table>
@@ -160,7 +155,7 @@
       <div class="bg-white rounded-lg shadow p-6 max-w-4xl">
         <h2 class="text-2xl font-bold mb-6">Add New Product</h2>
 
-        <form id="add-product-form" class="space-y-6">
+        <form id="add-product-form" class="space-y-6" enctype="multipart/form-data">
           
           <!-- Basic Info -->
           <div class="border-b pb-6">
@@ -170,7 +165,7 @@
                 <label class="block text-sm font-semibold mb-1">Product Name *</label>
                 <input 
                   type="text" 
-                  id="new-name"
+                  name="name"
                   class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                   required
                 />
@@ -179,7 +174,7 @@
               <div>
                 <label class="block text-sm font-semibold mb-1">Category *</label>
                 <select 
-                  id="new-category"
+                  name="category"
                   class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                   required
                 >
@@ -196,7 +191,7 @@
               <label class="block text-sm font-semibold mb-1">Subcategory *</label>
               <input 
                 type="text" 
-                id="new-subcategory"
+                name="subcategory"
                 placeholder="e.g., Refrigerators, Sofas, etc."
                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                 required
@@ -208,7 +203,7 @@
                 <label class="block text-sm font-semibold mb-1">Current Price (KSh) *</label>
                 <input 
                   type="number" 
-                  id="new-price"
+                  name="price"
                   class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                   required
                 />
@@ -218,7 +213,7 @@
                 <label class="block text-sm font-semibold mb-1">Old Price (KSh) *</label>
                 <input 
                   type="number" 
-                  id="new-oldPrice"
+                  name="old_price"
                   class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                   required
                 />
@@ -226,15 +221,18 @@
             </div>
 
             <div class="mt-4">
-              <label class="block text-sm font-semibold mb-1">Image URL *</label>
+              <label class="block text-sm font-semibold mb-1">Product Image *</label>
               <input 
-                type="url" 
-                id="new-image"
-                placeholder="https://example.com/image.jpg"
+                type="file" 
+                name="image"
+                accept="image/*"
                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
                 required
               />
-              <p class="text-xs text-gray-500 mt-1">Tip: Upload to Imgur or use Unsplash links</p>
+              <p class="text-xs text-gray-500 mt-1">Upload image (JPG, PNG, WEBP - Max 5MB)</p>
+              <div id="image-preview" class="mt-2 hidden">
+                <img src="" alt="Preview" class="h-32 w-32 object-cover rounded border">
+              </div>
             </div>
           </div>
 
@@ -245,7 +243,7 @@
             <div class="mb-4">
               <label class="block text-sm font-semibold mb-1">Description</label>
               <textarea 
-                id="new-description"
+                name="description"
                 rows="4"
                 placeholder="Detailed product description..."
                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
@@ -255,7 +253,7 @@
             <div class="mb-4">
               <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
               <textarea 
-                id="new-features"
+                name="features"
                 rows="6"
                 placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold font-mono text-sm"
@@ -277,6 +275,15 @@
             <button type="button" id="add-spec-btn" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
               + Add Specification
             </button>
+          </div>
+
+          <div id="upload-progress" class="hidden">
+            <div class="bg-blue-50 border border-blue-200 rounded p-4">
+              <p class="text-sm text-blue-800 font-semibold">Uploading...</p>
+              <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div class="bg-brandGold h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
           </div>
 
           <button type="submit" class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition">
@@ -311,8 +318,8 @@
       <button id="close-edit-modal" class="text-2xl hover:text-red-600">✕</button>
     </div>
 
-    <form id="edit-product-form" class="space-y-6">
-      <input type="hidden" id="edit-product-id">
+    <form id="edit-product-form" class="space-y-6" enctype="multipart/form-data">
+      <input type="hidden" name="id" id="edit-product-id">
 
       <!-- Basic Info -->
       <div class="border-b pb-6">
@@ -320,12 +327,12 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-1">Product Name</label>
-            <input type="text" id="edit-name" class="w-full border rounded px-4 py-2" required />
+            <input type="text" name="name" id="edit-name" class="w-full border rounded px-4 py-2" required />
           </div>
 
           <div>
             <label class="block text-sm font-semibold mb-1">Category</label>
-            <select id="edit-category" class="w-full border rounded px-4 py-2" required>
+            <select name="category" id="edit-category" class="w-full border rounded px-4 py-2" required>
               <option value="Home Appliances">Home Appliances</option>
               <option value="Kitchen">Kitchen</option>
               <option value="Bedroom">Bedroom</option>
@@ -336,24 +343,31 @@
 
         <div class="mt-4">
           <label class="block text-sm font-semibold mb-1">Subcategory</label>
-          <input type="text" id="edit-subcategory" class="w-full border rounded px-4 py-2" required />
+          <input type="text" name="subcategory" id="edit-subcategory" class="w-full border rounded px-4 py-2" required />
         </div>
 
         <div class="grid grid-cols-2 gap-4 mt-4">
           <div>
             <label class="block text-sm font-semibold mb-1">Current Price</label>
-            <input type="number" id="edit-price" class="w-full border rounded px-4 py-2" required />
+            <input type="number" name="price" id="edit-price" class="w-full border rounded px-4 py-2" required />
           </div>
 
           <div>
             <label class="block text-sm font-semibold mb-1">Old Price</label>
-            <input type="number" id="edit-oldPrice" class="w-full border rounded px-4 py-2" required />
+            <input type="number" name="old_price" id="edit-old-price" class="w-full border rounded px-4 py-2" required />
           </div>
         </div>
 
         <div class="mt-4">
-          <label class="block text-sm font-semibold mb-1">Image URL</label>
-          <input type="url" id="edit-image" class="w-full border rounded px-4 py-2" required />
+          <label class="block text-sm font-semibold mb-1">Product Image</label>
+          <img id="edit-current-image" src="" alt="Current" class="h-32 w-32 object-cover rounded border mb-2">
+          <input 
+            type="file" 
+            name="image"
+            accept="image/*"
+            class="w-full border rounded px-4 py-2"
+          />
+          <p class="text-xs text-gray-500 mt-1">Leave empty to keep current image</p>
         </div>
       </div>
 
@@ -364,6 +378,7 @@
         <div class="mb-4">
           <label class="block text-sm font-semibold mb-1">Description</label>
           <textarea 
+            name="description"
             id="edit-description"
             rows="4"
             class="w-full border rounded px-4 py-2"
@@ -373,6 +388,7 @@
         <div class="mb-4">
           <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
           <textarea 
+            name="features"
             id="edit-features"
             rows="6"
             class="w-full border rounded px-4 py-2 font-mono text-sm"
@@ -398,7 +414,13 @@
   </div>
 </div>
 
-<script src="js/data.js"></script>
-<script src="js/admin.js"></script>
+<script>
+// API Configuration
+const API_URL = 'http://localhost:5000/api';
+
+// Continue with admin.js logic in next message...
+</script>
+
+<script src="js/admin-new.js"></script>
 </body>
 </html>
