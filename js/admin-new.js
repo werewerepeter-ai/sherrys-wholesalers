@@ -1,6 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:5000/api';
-
+const API_URL = 'https://sherrys-backend.onrender.com/api';
 // ADMIN CREDENTIALS
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
