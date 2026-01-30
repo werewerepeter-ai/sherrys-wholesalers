@@ -72,7 +72,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'sherrys-products',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif', 'gif'], // <-- ADD 'avif' here
     transformation: [{ width: 1200, height: 1200, crop: 'limit' }],
     resource_type: 'auto'
   }
