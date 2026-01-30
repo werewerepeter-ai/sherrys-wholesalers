@@ -36,28 +36,15 @@
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-semibold mb-1">Username</label>
-        <input 
-          type="text" 
-          id="admin-username"
-          placeholder="Enter username" 
-          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
-        />
+        <input type="text" id="admin-username" placeholder="Enter username" class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold" />
       </div>
       
       <div>
         <label class="block text-sm font-semibold mb-1">Password</label>
-        <input 
-          type="password" 
-          id="admin-password"
-          placeholder="Enter password" 
-          class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold"
-        />
+        <input type="password" id="admin-password" placeholder="Enter password" class="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGold" />
       </div>
       
-      <button 
-        id="login-btn"
-        class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition"
-      >
+      <button id="login-btn" class="w-full bg-brandGold text-white font-bold py-3 rounded hover:bg-yellow-600 transition">
         Login
       </button>
 
@@ -74,7 +61,7 @@
 
 <!-- ADMIN DASHBOARD -->
 <div id="admin-dashboard" class="hidden min-h-screen">
-  
+
   <!-- Header -->
   <header class="bg-white shadow">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -85,9 +72,7 @@
           <p class="text-xs text-gray-600">Backend API Connected ✓</p>
         </div>
       </div>
-      <button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">
-        Logout
-      </button>
+      <button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Logout</button>
     </div>
   </header>
 
@@ -109,7 +94,7 @@
   </div>
 
   <!-- Content -->
-  <main class="max-w-7xl mx-auto px-4 py-6">
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
     <!-- PRODUCTS TAB -->
     <div id="products-tab" class="tab-content">
@@ -144,6 +129,71 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD PRODUCT TAB -->
+    <div id="add-product-tab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold mb-4">Add New Product</h2>
+        <form id="add-product-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold mb-1">Name</label>
+            <input type="text" name="name" required class="w-full border rounded px-4 py-2"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Category</label>
+            <input type="text" name="category" required class="w-full border rounded px-4 py-2"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Subcategory</label>
+            <input type="text" name="subcategory" class="w-full border rounded px-4 py-2"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Price</label>
+            <input type="number" name="price" required class="w-full border rounded px-4 py-2"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Old Price</label>
+            <input type="number" name="old_price" class="w-full border rounded px-4 py-2"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Description</label>
+            <textarea name="description" class="w-full border rounded px-4 py-2"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
+            <textarea name="features" class="w-full border rounded px-4 py-2"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Specs</label>
+            <div id="specs-container">
+              <div class="grid grid-cols-2 gap-3 mb-2">
+                <input type="text" placeholder="Spec name" class="spec-name border rounded px-4 py-2 text-sm"/>
+                <input type="text" placeholder="Spec value" class="spec-value border rounded px-4 py-2 text-sm"/>
+              </div>
+            </div>
+            <button type="button" id="add-spec-btn" class="bg-brandGold text-white px-3 py-1 rounded mt-2">Add Spec</button>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Image</label>
+            <input type="file" name="image" accept="image/*" class="w-full border rounded px-4 py-2"/>
+            <div id="image-preview" class="hidden mt-2">
+              <img src="" alt="Preview" class="h-32 rounded"/>
+            </div>
+          </div>
+          <button type="submit" class="bg-brandGold text-white px-6 py-2 rounded font-bold mt-4">Add Product</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- CATEGORIES TAB -->
+    <div id="categories-tab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold mb-4">Categories Overview</h2>
+        <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- JS will populate categories here -->
         </div>
       </div>
     </div>
