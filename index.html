@@ -52,11 +52,8 @@
   <!-- CATEGORIES -->
   <aside class="bg-white p-4 rounded shadow">
     <h3 class="font-bold mb-3">Categories</h3>
-    <ul class="space-y-2 text-sm">
-      <li><a href="category.html?category=Home%20Appliances" class="hover:text-brandGold block">Home Appliances</a></li>
-      <li><a href="category.html?category=Kitchen" class="hover:text-brandGold block">Kitchen</a></li>
-      <li><a href="category.html?category=Bedroom" class="hover:text-brandGold block">Bedroom</a></li>
-      <li><a href="category.html?category=Living%20Room" class="hover:text-brandGold block">Living Room</a></li>
+    <ul class="space-y-2 text-sm" id="categories-list">
+      <li>Loading...</li>
     </ul>
   </aside>
 
@@ -64,8 +61,16 @@
   <section class="md:col-span-3">
     <h2 class="text-xl font-bold mb-4">Top Deals</h2>
 
-    <div id="products" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div id="loading-products" class="text-center py-8">
+      <p>Loading products...</p>
+    </div>
+
+    <div id="products" class="grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
       <!-- Products will load here -->
+    </div>
+
+    <div id="no-products" class="hidden text-center py-8">
+      <p class="text-gray-500">No products available</p>
     </div>
   </section>
 
@@ -77,49 +82,105 @@
   <p>📞 +254 710 553 678</p>
 </footer>
 
-<script src="js/data.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/data.js"></script>
 
 <script>
-  // Wait for DOM to be ready
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    const container = document.getElementById("products");
+  // API Configuration
+  const API_URL = 'https://sherrys-backend.onrender.com/api';
 
-    // Check if products exist
-    if (typeof products === 'undefined' || !products || products.length === 0) {
-      container.innerHTML = '<p class="col-span-full text-center text-gray-500">No products available</p>';
+  // Calculate discount percentage
+  function getDiscount(oldPrice, newPrice) {
+    if (!oldPrice || oldPrice <= newPrice) return 0;
+    return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+  }
+
+  // Load and display products
+  async function loadHomepageProducts() {
+    try {
+      // Check if data.js has loaded products
+      if (typeof products !== 'undefined' && products && products.length > 0) {
+        displayProducts(products);
+        updateCategories(products);
+      } else {
+        // Try to fetch from API
+        const response = await fetch(`${API_URL}/products`);
+        if (!response.ok) throw new Error('API error');
+        
+        const apiProducts = await response.json();
+        
+        // Transform API data
+        const transformedProducts = apiProducts.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          subcategory: item.subcategory || '',
+          price: item.price,
+          oldPrice: item.old_price || Math.round(item.price * 1.1),
+          image: item.main_image_url || item.image_url || '',
+          details: {
+            description: item.description || '',
+            features: item.features || [],
+            specifications: item.specifications || {}
+          }
+        }));
+        
+        displayProducts(transformedProducts);
+        updateCategories(transformedProducts);
+      }
+      
+    } catch (error) {
+      console.error('Error loading products:', error);
+      document.getElementById('no-products').classList.remove('hidden');
+      document.getElementById('loading-products').classList.add('hidden');
+    }
+  }
+
+  function displayProducts(productsArray) {
+    const container = document.getElementById('products');
+    const loading = document.getElementById('loading-products');
+    const noProducts = document.getElementById('no-products');
+    
+    if (!productsArray || productsArray.length === 0) {
+      loading.classList.add('hidden');
+      noProducts.classList.remove('hidden');
       return;
     }
-
-    // Take first 8 products (or however many you want on homepage)
-    const featuredProducts = products.slice(0, 8);
-
-    featuredProducts.forEach(p => {
-      const discount = Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100);
+    
+    loading.classList.add('hidden');
+    container.classList.remove('hidden');
+    
+    // Take first 8 products
+    const featuredProducts = productsArray.slice(0, 8);
+    
+    container.innerHTML = featuredProducts.map(p => {
+      const discount = getDiscount(p.oldPrice, p.price);
       
-      const productCard = document.createElement('div');
-      productCard.className = 'bg-white p-3 rounded shadow hover:shadow-lg transition relative';
-      productCard.innerHTML = `
-        <span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
-          -${discount}%
-        </span>
-        <a href="product.html?id=${p.id}">
-          <img src="${p.image}" class="h-32 w-full object-cover mb-2 rounded cursor-pointer hover:opacity-90">
-          <h3 class="text-sm font-semibold line-clamp-2 h-10 cursor-pointer hover:text-brandBlue">${p.name}</h3>
-        </a>
-        <p class="text-brandBlue font-bold mt-1">KSh ${p.price.toLocaleString()}</p>
-        <p class="text-xs line-through text-gray-400">KSh ${p.oldPrice.toLocaleString()}</p>
-        <button 
-          class="add-to-cart-btn mt-2 w-full bg-brandGold text-white py-1 rounded hover:bg-yellow-600 transition"
-          data-product='${JSON.stringify(p)}'
-        >
-          Add to Cart
-        </button>
+      return `
+        <div class="bg-white p-3 rounded shadow hover:shadow-lg transition relative">
+          ${discount > 0 ? `
+            <span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
+              -${discount}%
+            </span>
+          ` : ''}
+          <a href="product.html?id=${p.id}">
+            <img src="${p.image}" class="h-32 w-full object-cover mb-2 rounded cursor-pointer hover:opacity-90">
+            <h3 class="text-sm font-semibold line-clamp-2 h-10 cursor-pointer hover:text-brandBlue">${p.name}</h3>
+          </a>
+          <p class="text-brandBlue font-bold mt-1">KSh ${p.price.toLocaleString()}</p>
+          ${p.oldPrice > p.price ? `
+            <p class="text-xs line-through text-gray-400">KSh ${p.oldPrice.toLocaleString()}</p>
+          ` : ''}
+          <button 
+            class="add-to-cart-btn mt-2 w-full bg-brandGold text-white py-1 rounded hover:bg-yellow-600 transition"
+            data-product='${JSON.stringify(p).replace(/'/g, "&#39;")}'
+          >
+            Add to Cart
+          </button>
+        </div>
       `;
-      container.appendChild(productCard);
-    });
-
+    }).join('');
+    
     // Add to cart functionality
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
       btn.addEventListener('click', function() {
@@ -127,24 +188,33 @@
         addToCart(product);
       });
     });
+  }
 
-    // Update cart count
-    if (typeof updateCartCount === 'function') {
-      updateCartCount();
-    }
+  function updateCategories(productsArray) {
+    const categoriesList = document.getElementById('categories-list');
+    if (!categoriesList) return;
+    
+    const categories = [...new Set(productsArray.map(p => p.category))].filter(Boolean);
+    
+    categoriesList.innerHTML = categories.map(cat => `
+      <li><a href="category.html?category=${encodeURIComponent(cat)}" class="hover:text-brandGold block">${cat}</a></li>
+    `).join('');
+  }
 
-    // Search functionality
-    const searchInput = document.getElementById('search-input-home');
-    if (searchInput) {
-      searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          const query = e.target.value.trim();
-          if (query) {
-            window.location.href = `category.html?search=${encodeURIComponent(query)}`;
-          }
-        }
-      });
+  // Search functionality
+  document.getElementById('search-input-home').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const query = e.target.value.trim();
+      if (query) {
+        window.location.href = `category.html?search=${encodeURIComponent(query)}`;
+      }
     }
+  });
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    loadHomepageProducts();
+    updateCartCount();
   });
 </script>
 </body>
