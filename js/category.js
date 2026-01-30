@@ -1,6 +1,3 @@
-// API Configuration
-const API_URL = 'https://sherrys-backend.onrender.com/api';
-
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async function() {
 

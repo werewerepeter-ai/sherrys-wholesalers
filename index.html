@@ -97,15 +97,18 @@
     try {
       console.log('🏠 loadHomepageProducts called');
       
+      // Use the API_URL from data.js or fallback
+      const apiUrl = window.API_URL || 'https://sherrys-backend.onrender.com/api';
+      
       // Check if data.js has loaded products
       if (typeof products !== 'undefined' && products && products.length > 0) {
         console.log('📦 Using products from data.js:', products.length);
         displayProducts(products);
-        updateCategories(products);
+        // Delay categories update to ensure DOM is ready
+        setTimeout(() => updateCategories(products), 100);
       } else {
         console.log('🌐 Fetching directly from API...');
         // Try to fetch from API
-        const apiUrl = 'https://sherrys-backend.onrender.com/api';
         const response = await fetch(`${apiUrl}/products`);
         if (!response.ok) throw new Error('API error');
         
@@ -122,6 +125,8 @@
             // Split comma-separated string and take first image
             const images = item.image_url.split(',').map(img => img.trim());
             imageUrl = images[0] || '';
+          } else if (item.main_image) {
+            imageUrl = item.main_image;
           }
           
           return {
@@ -142,7 +147,8 @@
         
         console.log('✨ Transformed products:', transformedProducts);
         displayProducts(transformedProducts);
-        updateCategories(transformedProducts);
+        // Delay categories update
+        setTimeout(() => updateCategories(transformedProducts), 100);
       }
       
     } catch (error) {
@@ -188,7 +194,7 @@
             <img src="${p.image}" 
                  alt="${p.name}" 
                  class="h-32 w-full object-cover mb-2 rounded cursor-pointer hover:opacity-90"
-                 onerror="this.src='https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400'">
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400'">
             <h3 class="text-sm font-semibold line-clamp-2 h-10 cursor-pointer hover:text-brandBlue">${p.name}</h3>
           </a>
           <p class="text-brandBlue font-bold mt-1">KSh ${p.price.toLocaleString()}</p>
@@ -208,23 +214,44 @@
     // Add to cart functionality
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        const product = JSON.parse(this.getAttribute('data-product'));
-        addToCart(product);
+        try {
+          const product = JSON.parse(this.getAttribute('data-product').replace(/&#39;/g, "'"));
+          if (typeof addToCart === 'function') {
+            addToCart(product);
+          } else {
+            console.warn('addToCart function not found');
+            alert(`Added to cart: ${product.name}`);
+          }
+        } catch (e) {
+          console.error('Error adding to cart:', e);
+        }
       });
     });
   }
 
   function updateCategories(productsArray) {
-    console.log('🏷️ updateCategories called');
+    console.log('🏷️ updateCategories called with', productsArray?.length, 'products');
     const categoriesList = document.getElementById('categories-list');
-    if (!categoriesList) return;
     
+    if (!categoriesList) {
+      console.error('❌ categories-list element not found!');
+      return;
+    }
+    
+    console.log('✅ Found categories-list element');
     const categories = [...new Set(productsArray.map(p => p.category))].filter(Boolean);
     console.log('📋 Categories found:', categories);
     
+    if (categories.length === 0) {
+      categoriesList.innerHTML = '<li class="text-gray-500">No categories found</li>';
+      return;
+    }
+    
     categoriesList.innerHTML = categories.map(cat => `
-      <li><a href="category.html?category=${encodeURIComponent(cat)}" class="hover:text-brandGold block">${cat}</a></li>
+      <li><a href="category.html?category=${encodeURIComponent(cat)}" class="hover:text-brandGold block py-1">${cat}</a></li>
     `).join('');
+    
+    console.log('✅ Categories updated successfully');
   }
 
   // Search functionality
@@ -244,7 +271,25 @@
   document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM loaded, initializing...');
     loadHomepageProducts();
-    updateCartCount();
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    }
+    
+    // Fallback categories update in case updateCategories fails
+    setTimeout(() => {
+      console.log('⏰ Fallback categories check...');
+      const catList = document.getElementById('categories-list');
+      if (catList && catList.innerHTML.includes('Loading')) {
+        console.log('🔄 Running fallback categories update...');
+        if (window.productsData && window.productsData.categories) {
+          const cats = window.productsData.categories;
+          catList.innerHTML = cats.map(cat => `
+            <li><a href="category.html?category=${encodeURIComponent(cat)}" class="hover:text-brandGold block">${cat}</a></li>
+          `).join('');
+          console.log('✅ Fallback categories update complete');
+        }
+      }
+    }, 2000);
   });
 </script>
 </body>
