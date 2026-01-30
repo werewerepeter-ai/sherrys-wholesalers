@@ -163,7 +163,7 @@
             <textarea name="description" class="w-full border rounded px-4 py-2"></textarea>
           </div>
           
-          <!-- UPDATED FEATURES SECTION -->
+          <!-- FEATURES SECTION -->
           <div>
             <label class="block text-sm font-semibold mb-1">Features</label>
             
@@ -217,23 +217,94 @@
             <input type="hidden" id="features-json" name="features" />
           </div>
           
+          <!-- SPECS SECTION -->
           <div>
-            <label class="block text-sm font-semibold mb-1">Specs</label>
-            <div id="specs-container">
-              <div class="grid grid-cols-2 gap-3 mb-2">
-                <input type="text" placeholder="Spec name" class="spec-name border rounded px-4 py-2 text-sm"/>
-                <input type="text" placeholder="Spec value" class="spec-value border rounded px-4 py-2 text-sm"/>
+            <label class="block text-sm font-semibold mb-1">Specifications</label>
+            
+            <!-- Bulk paste section for specs -->
+            <div class="mb-3">
+              <label class="text-xs text-gray-600 mb-1 block">
+                Paste all specs at once (one per line, format: "Name: Value"):
+              </label>
+              <textarea 
+                id="specs-bulk" 
+                placeholder="Capacity: 300L&#10;Color: Stainless Steel&#10;Energy Rating: A++&#10;Weight: 50kg"
+                class="w-full border rounded px-4 py-2 text-sm mb-2" 
+                rows="3"
+              ></textarea>
+              <button 
+                type="button" 
+                onclick="parseBulkSpecs()" 
+                class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200"
+              >
+                Parse Specs
+              </button>
+            </div>
+            
+            <!-- Specs display -->
+            <div class="mb-3">
+              <label class="text-xs text-gray-600 mb-1 block">Specs List (<span id="specs-count">0</span>):</label>
+              <div id="specs-display" class="border rounded p-3 max-h-32 overflow-y-auto text-sm bg-gray-50">
+                <div class="text-gray-400 italic">No specs added yet</div>
               </div>
             </div>
-            <button type="button" id="add-spec-btn" class="bg-brandGold text-white px-3 py-1 rounded mt-2">Add Spec</button>
+            
+            <!-- Individual spec add -->
+            <div class="flex gap-2 mb-3">
+              <input 
+                type="text" 
+                id="spec-name-input" 
+                placeholder="Spec name" 
+                class="flex-1 border rounded px-4 py-2 text-sm"
+              />
+              <input 
+                type="text" 
+                id="spec-value-input" 
+                placeholder="Spec value" 
+                class="flex-1 border rounded px-4 py-2 text-sm"
+                onkeypress="if(event.key === 'Enter') addSingleSpec()"
+              />
+              <button 
+                type="button" 
+                onclick="addSingleSpec()" 
+                class="bg-brandGold text-white px-3 py-2 rounded text-sm"
+              >
+                Add
+              </button>
+            </div>
+            
+            <!-- Hidden field for form submission -->
+            <input type="hidden" id="specs-json" name="specifications" />
           </div>
+          
+          <!-- MULTIPLE IMAGES SECTION -->
           <div>
-            <label class="block text-sm font-semibold mb-1">Image</label>
-            <input type="file" name="image" accept="image/*" class="w-full border rounded px-4 py-2"/>
-            <div id="image-preview" class="hidden mt-2">
-              <img src="" alt="Preview" class="h-32 rounded"/>
+            <label class="block text-sm font-semibold mb-1">Product Images (Up to 5 images)</label>
+            <div class="mb-3">
+              <label class="text-xs text-gray-600 mb-1 block">
+                First image will be the main display image
+              </label>
+              <input 
+                type="file" 
+                id="images-input" 
+                accept="image/*" 
+                multiple 
+                class="w-full border rounded px-4 py-2"
+              />
+            </div>
+            
+            <!-- Image previews -->
+            <div id="images-preview-container" class="hidden">
+              <label class="text-xs text-gray-600 mb-2 block">Selected Images (<span id="images-count">0</span>):</label>
+              <div id="images-preview" class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <!-- Image previews will be added here -->
+              </div>
+              <div class="text-xs text-gray-500 mt-2">
+                <span class="font-medium">Tip:</span> First image will be used as main product image
+              </div>
             </div>
           </div>
+          
           <button type="submit" class="bg-brandGold text-white px-6 py-2 rounded font-bold mt-4">Add Product</button>
         </form>
       </div>

@@ -6,7 +6,9 @@ const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
 
 let allProducts = [];
-let featuresList = []; // For bulk features management
+let featuresList = [];
+let specsList = {};
+let selectedImages = [];
 
 /* ======================================================
    FEATURES MANAGEMENT FUNCTIONS
@@ -94,6 +96,193 @@ function updateFeaturesDisplay() {
 }
 
 /* ======================================================
+   SPECS MANAGEMENT FUNCTIONS
+====================================================== */
+function parseBulkSpecs() {
+  const bulkText = document.getElementById('specs-bulk');
+  if (!bulkText) return;
+  
+  const text = bulkText.value.trim();
+  if (!text) return;
+  
+  let parsedCount = 0;
+  
+  // Parse from text: each line as "key: value"
+  const lines = text.split('\n');
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    
+    // Try to split by colon
+    const colonIndex = trimmed.indexOf(':');
+    if (colonIndex === -1) {
+      // Try by dash or equals
+      const dashIndex = trimmed.indexOf('-');
+      const equalsIndex = trimmed.indexOf('=');
+      const separatorIndex = Math.max(dashIndex, equalsIndex);
+      
+      if (separatorIndex !== -1) {
+        const key = trimmed.substring(0, separatorIndex).trim();
+        const value = trimmed.substring(separatorIndex + 1).trim();
+        if (key && value) {
+          specsList[key] = value;
+          parsedCount++;
+        }
+      }
+    } else {
+      const key = trimmed.substring(0, colonIndex).trim();
+      const value = trimmed.substring(colonIndex + 1).trim();
+      if (key && value) {
+        specsList[key] = value;
+        parsedCount++;
+      }
+    }
+  });
+  
+  updateSpecsDisplay();
+  bulkText.value = ''; // Clear after parsing
+  alert(`✅ Added ${parsedCount} specs!`);
+}
+
+function addSingleSpec() {
+  const nameInput = document.getElementById('spec-name-input');
+  const valueInput = document.getElementById('spec-value-input');
+  
+  if (!nameInput || !valueInput) return;
+  
+  const name = nameInput.value.trim();
+  const value = valueInput.value.trim();
+  
+  if (!name || !value) {
+    alert('Please enter both spec name and value!');
+    return;
+  }
+  
+  specsList[name] = value;
+  updateSpecsDisplay();
+  
+  // Clear inputs
+  nameInput.value = '';
+  valueInput.value = '';
+  nameInput.focus();
+}
+
+function removeSpec(key) {
+  if (specsList.hasOwnProperty(key)) {
+    delete specsList[key];
+    updateSpecsDisplay();
+  }
+}
+
+function updateSpecsDisplay() {
+  const display = document.getElementById('specs-display');
+  const count = document.getElementById('specs-count');
+  const jsonField = document.getElementById('specs-json');
+  
+  if (!display || !count || !jsonField) return;
+  
+  // Update count
+  const specCount = Object.keys(specsList).length;
+  count.textContent = specCount;
+  
+  // Update display
+  if (specCount === 0) {
+    display.innerHTML = '<div class="text-gray-400 italic">No specs added yet</div>';
+  } else {
+    display.innerHTML = Object.entries(specsList).map(([key, value]) => `
+      <div class="flex justify-between items-center py-1 border-b last:border-b-0">
+        <div class="text-sm">
+          <span class="font-medium">${key}:</span> 
+          <span class="text-gray-600">${value}</span>
+        </div>
+        <button 
+          type="button" 
+          onclick="removeSpec('${key.replace(/'/g, "\\'")}')" 
+          class="text-red-500 hover:text-red-700 text-xs px-2"
+        >
+          Remove
+        </button>
+      </div>
+    `).join('');
+  }
+  
+  // Update hidden JSON field
+  jsonField.value = JSON.stringify(specsList);
+}
+
+/* ======================================================
+   MULTIPLE IMAGES MANAGEMENT FUNCTIONS
+====================================================== */
+function handleImageSelection() {
+  const input = document.getElementById('images-input');
+  if (!input) return;
+  
+  const files = Array.from(input.files);
+  
+  // Limit to 5 images
+  if (files.length > 5) {
+    alert('Maximum 5 images allowed. Selecting first 5 images.');
+    files.splice(5);
+  }
+  
+  selectedImages = files;
+  updateImagesPreview();
+}
+
+function updateImagesPreview() {
+  const container = document.getElementById('images-preview-container');
+  const preview = document.getElementById('images-preview');
+  const count = document.getElementById('images-count');
+  
+  if (!container || !preview || !count) return;
+  
+  count.textContent = selectedImages.length;
+  
+  if (selectedImages.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  preview.innerHTML = '';
+  
+  selectedImages.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const div = document.createElement('div');
+      div.className = 'relative border rounded overflow-hidden';
+      div.innerHTML = `
+        <img src="${e.target.result}" alt="Preview ${index + 1}" class="h-24 w-full object-cover">
+        <div class="absolute top-0 left-0 bg-black bg-opacity-70 text-white text-xs px-2 py-1">
+          ${index === 0 ? 'MAIN' : index + 1}
+        </div>
+        <button 
+          type="button" 
+          onclick="removeImage(${index})" 
+          class="absolute top-0 right-0 bg-red-600 text-white text-xs px-2 py-1 hover:bg-red-700"
+        >
+          ✕
+        </button>
+      `;
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeImage(index) {
+  selectedImages.splice(index, 1);
+  
+  // Update file input
+  const input = document.getElementById('images-input');
+  const dataTransfer = new DataTransfer();
+  selectedImages.forEach(file => dataTransfer.items.add(file));
+  input.files = dataTransfer.files;
+  
+  updateImagesPreview();
+}
+
+/* ======================================================
    DOM READY
 ====================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -131,8 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('admin-dashboard').classList.add('hidden');
       document.getElementById('admin-username').value = '';
       document.getElementById('admin-password').value = '';
-      // Reset features list on logout
+      // Reset all data
       featuresList = [];
+      specsList = {};
+      selectedImages = [];
     });
   }
 
@@ -149,59 +340,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeTab = document.getElementById(tab + '-tab');
       if (activeTab) activeTab.classList.remove('hidden');
       
-      // Reset features when switching to add product tab
+      // Reset form when switching to add product tab
       if (tab === 'add-product') {
         featuresList = [];
+        specsList = {};
+        selectedImages = [];
         updateFeaturesDisplay();
+        updateSpecsDisplay();
+        updateImagesPreview();
       }
     });
   });
 
-  /* ================= IMAGE PREVIEW ================= */
-  const imageInput = document.querySelector('input[name="image"]');
-  if (imageInput) {
-    imageInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      // Check file type
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      if (!validTypes.includes(file.type)) {
-        alert('Please upload JPG, PNG, or WebP images only!');
-        e.target.value = '';
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const preview = document.getElementById('image-preview');
-        if (!preview) return;
-        preview.classList.remove('hidden');
-        preview.querySelector('img').src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+  /* ================= MULTIPLE IMAGES INPUT ================= */
+  const imagesInput = document.getElementById('images-input');
+  if (imagesInput) {
+    imagesInput.addEventListener('change', handleImageSelection);
   }
 
-  /* ================= ADD SPEC ROWS ================= */
-  const addSpecBtn = document.getElementById('add-spec-btn');
-  if (addSpecBtn) {
-    addSpecBtn.addEventListener('click', () => {
-      const container = document.getElementById('specs-container');
-      if (!container) return;
-      const row = document.createElement('div');
-      row.className = 'grid grid-cols-2 gap-3 mb-2';
-      row.innerHTML = `
-        <input type="text" placeholder="Spec name" class="spec-name border rounded px-4 py-2 text-sm" />
-        <div class="flex gap-2">
-          <input type="text" placeholder="Spec value" class="spec-value border rounded px-4 py-2 text-sm flex-1" />
-          <button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-600 text-white px-3 rounded">×</button>
-        </div>
-      `;
-      container.appendChild(row);
-    });
-  }
-
+  /* ================= ADD SPEC ROWS (for edit modal) ================= */
   const editAddSpecBtn = document.getElementById('edit-add-spec-btn');
   if (editAddSpecBtn) {
     editAddSpecBtn.addEventListener('click', () => {
@@ -210,9 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = document.createElement('div');
       row.className = 'grid grid-cols-2 gap-3 mb-2';
       row.innerHTML = `
-        <input type="text" class="edit-spec-name border rounded px-4 py-2 text-sm" />
+        <input type="text" class="edit-spec-name border rounded px-4 py-2 text-sm" placeholder="Spec name" />
         <div class="flex gap-2">
-          <input type="text" class="edit-spec-value border rounded px-4 py-2 text-sm flex-1" />
+          <input type="text" class="edit-spec-value border rounded px-4 py-2 text-sm flex-1" placeholder="Spec value" />
           <button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-600 text-white px-3 rounded">×</button>
         </div>
       `;
@@ -256,20 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const formData = new FormData(addForm);
 
-        // Get specs from dynamic inputs
-        const specs = {};
-        document.querySelectorAll('.spec-name').forEach((nameInput, i) => {
-          const valueInputs = document.querySelectorAll('.spec-value');
-          if (valueInputs[i]) {
-            const name = nameInput.value.trim();
-            const value = valueInputs[i].value.trim();
-            if (name && value) {
-              specs[name] = value;
-            }
-          }
-        });
-
-        // Features - use featuresList if available, otherwise from textarea
+        // Features - use featuresList if available
         let features = [];
         if (featuresList.length > 0) {
           features = featuresList;
@@ -279,11 +423,22 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
               features = JSON.parse(featuresText);
             } catch (e) {
-              // Fallback to textarea parsing
-              const textarea = addForm.querySelector('textarea[name="features"]');
-              if (textarea) {
-                features = textarea.value.split('\n').filter(f => f.trim());
-              }
+              features = [];
+            }
+          }
+        }
+
+        // Specs - use specsList if available
+        let specs = {};
+        if (Object.keys(specsList).length > 0) {
+          specs = specsList;
+        } else {
+          const specsText = document.getElementById('specs-json')?.value;
+          if (specsText) {
+            try {
+              specs = JSON.parse(specsText);
+            } catch (e) {
+              specs = {};
             }
           }
         }
@@ -297,30 +452,33 @@ document.addEventListener('DOMContentLoaded', () => {
         submitData.append('old_price', formData.get('old_price')?.trim() || '');
         submitData.append('description', formData.get('description')?.trim() || '');
         
-        // Append image if selected
-        const imageInput = addForm.querySelector('input[name="image"]');
-        if (imageInput?.files[0]) {
-          submitData.append('image', imageInput.files[0]);
-        } else {
-          alert('❌ Please select an image!');
+        // Append features and specs as JSON
+        submitData.append('features', JSON.stringify(features));
+        submitData.append('specifications', JSON.stringify(specs));
+        
+        // Check if we have images
+        if (selectedImages.length === 0) {
+          alert('❌ Please select at least one image!');
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
           return;
         }
         
-        // Append features and specs as JSON
-        submitData.append('features', JSON.stringify(features));
-        submitData.append('specifications', JSON.stringify(specs));
+        // Append all images
+        selectedImages.forEach((image, index) => {
+          submitData.append('images', image);
+        });
 
         console.log('Submitting product with:', {
           name: submitData.get('name'),
           category: submitData.get('category'),
-          features,
-          specs
+          images: selectedImages.length,
+          features: features.length,
+          specs: Object.keys(specs).length
         });
 
-        // Send to API
-        const res = await fetch(API_URL + '/products', {
+        // Send to MULTIPLE images endpoint
+        const res = await fetch(API_URL + '/products/multiple', {
           method: 'POST',
           body: submitData
         });
@@ -331,24 +489,16 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(result.details || result.error || 'Failed to add product');
         }
 
-        alert('✅ Product added successfully!');
+        alert(`✅ Product added successfully with ${selectedImages.length} images!`);
         
         // Reset form
         addForm.reset();
         featuresList = [];
+        specsList = {};
+        selectedImages = [];
         updateFeaturesDisplay();
-        document.getElementById('image-preview').classList.add('hidden');
-        
-        // Reset specs container
-        const specsContainer = document.getElementById('specs-container');
-        if (specsContainer) {
-          specsContainer.innerHTML = `
-            <div class="grid grid-cols-2 gap-3 mb-2">
-              <input type="text" placeholder="Spec name" class="spec-name border rounded px-4 py-2 text-sm" />
-              <input type="text" placeholder="Spec value" class="spec-value border rounded px-4 py-2 text-sm" />
-            </div>
-          `;
-        }
+        updateSpecsDisplay();
+        updateImagesPreview();
         
         // Switch to products tab
         document.querySelector('[data-tab="products"]').click();
@@ -477,10 +627,16 @@ function displayProducts(products) {
       <td class="px-4 py-3 text-sm">${p.id}</td>
       <td class="px-4 py-3">
         <img src="${p.image_url}" alt="${p.name}" class="h-12 w-12 object-cover rounded">
+        ${p.additional_images?.length > 0 ? 
+          `<div class="text-xs text-gray-500 mt-1">+${p.additional_images.length} more</div>` : 
+          ''}
       </td>
       <td class="px-4 py-3 font-semibold">
         <div class="text-sm">${p.name}</div>
-        <div class="text-xs text-gray-500 mt-1">${(p.features || []).length} features</div>
+        <div class="text-xs text-gray-500 mt-1">
+          ${(p.features || []).length} features • 
+          ${Object.keys(p.specifications || {}).length} specs
+        </div>
       </td>
       <td class="px-4 py-3 text-sm">
         <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${p.category}</span>
