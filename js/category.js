@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         subcategory: item.subcategory || '',
         price: item.price,
         oldPrice: item.old_price || Math.round(item.price * 1.1),
-        image: item.main_image_url || item.image_url || '',
+        image: item.main_image_url || (item.image_url ? item.image_url.split(',')[0] : ''),
         details: {
           description: item.description || `${item.name} - High quality product from Sherry's Wholesalers.`,
           features: Array.isArray(item.features) ? item.features : [],

@@ -117,7 +117,7 @@
           subcategory: item.subcategory || '',
           price: item.price,
           oldPrice: item.old_price || Math.round(item.price * 1.1),
-          image: item.main_image_url || item.image_url || '',
+          image: item.main_image_url || (item.image_url ? item.image_url.split(',')[0].trim() : ''),
           details: {
             description: item.description || '',
             features: item.features || [],

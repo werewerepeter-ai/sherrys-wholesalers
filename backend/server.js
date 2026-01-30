@@ -261,7 +261,12 @@ app.get('/api/products', async (req, res) => {
       query += ' ORDER BY created_at DESC';
     }
 
-    console.log(`📋 Fetching products with query:`, { category, subcategory, search });
+    // Only log parameters that have values
+const queryParams = {};
+if (category && category !== 'undefined') queryParams.category = category;
+if (subcategory && subcategory !== 'undefined') queryParams.subcategory = subcategory;
+if (search && search !== 'undefined') queryParams.search = search;
+console.log(`📋 Fetching products with query:`, Object.keys(queryParams).length > 0 ? queryParams : 'No filters');
     const result = await pool.query(query, values);
     
     // Format response

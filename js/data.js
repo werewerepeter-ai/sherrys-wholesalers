@@ -18,20 +18,32 @@ async function loadProducts() {
     const apiProducts = await response.json();
     
     // Transform API data to match existing format
-    products = apiProducts.map(item => ({
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      subcategory: item.subcategory || '',
-      price: item.price,
-      oldPrice: item.old_price || Math.round(item.price * 1.1), // Calculate 10% higher if no old price
-      image: item.main_image_url || item.image_url || '',
-      details: {
-        description: item.description || `${item.name} - High quality product from Sherry's Wholesalers.`,
-        features: Array.isArray(item.features) ? item.features : [],
-        specifications: item.specifications || {}
+    products = apiProducts.map(item => {
+      // Handle image - take first image if multiple
+      let imageUrl = '';
+      if (item.main_image_url) {
+        imageUrl = item.main_image_url;
+      } else if (item.image_url) {
+        // Split comma-separated string and take first image
+        const images = item.image_url.split(',').map(img => img.trim());
+        imageUrl = images[0] || '';
       }
-    }));
+      
+      return {
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        subcategory: item.subcategory || '',
+        price: item.price,
+        oldPrice: item.old_price || Math.round(item.price * 1.1), // Calculate 10% higher if no old price
+        image: imageUrl,
+        details: {
+          description: item.description || `${item.name} - High quality product from Sherry's Wholesalers.`,
+          features: Array.isArray(item.features) ? item.features : [],
+          specifications: item.specifications || {}
+        }
+      };
+    });
     
     // Update categories
     categories = [...new Set(products.map(p => p.category))];
@@ -171,12 +183,16 @@ function displayHomepageProducts() {
   if (featuredContainer) {
     const featured = getFeaturedProducts(8);
     // Add your homepage display logic here
+    console.log('🏠 Homepage: Found featured products container');
   }
   
   if (dealsContainer) {
     const deals = getDealProducts(6);
     // Add your deals display logic here
+    console.log('🏠 Homepage: Found deals container');
   }
+  
+  console.log('🏠 Homepage: Display function called');
 }
 
 // Auto-initialize on page load
