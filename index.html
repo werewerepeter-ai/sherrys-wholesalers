@@ -86,9 +86,6 @@
 <script src="js/data.js"></script>
 
 <script>
-  // API Configuration
-  const API_URL = 'https://sherrys-backend.onrender.com/api';
-
   // Calculate discount percentage
   function getDiscount(oldPrice, newPrice) {
     if (!oldPrice || oldPrice <= newPrice) return 0;
@@ -98,55 +95,78 @@
   // Load and display products
   async function loadHomepageProducts() {
     try {
+      console.log('🏠 loadHomepageProducts called');
+      
       // Check if data.js has loaded products
       if (typeof products !== 'undefined' && products && products.length > 0) {
+        console.log('📦 Using products from data.js:', products.length);
         displayProducts(products);
         updateCategories(products);
       } else {
+        console.log('🌐 Fetching directly from API...');
         // Try to fetch from API
-        const response = await fetch(`${API_URL}/products`);
+        const apiUrl = 'https://sherrys-backend.onrender.com/api';
+        const response = await fetch(`${apiUrl}/products`);
         if (!response.ok) throw new Error('API error');
         
         const apiProducts = await response.json();
+        console.log('📊 Raw API products:', apiProducts);
         
         // Transform API data
-        const transformedProducts = apiProducts.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          subcategory: item.subcategory || '',
-          price: item.price,
-          oldPrice: item.old_price || Math.round(item.price * 1.1),
-          image: item.main_image_url || (item.image_url ? item.image_url.split(',')[0].trim() : ''),
-          details: {
-            description: item.description || '',
-            features: item.features || [],
-            specifications: item.specifications || {}
+        const transformedProducts = apiProducts.map(item => {
+          // Handle image - take first image if multiple
+          let imageUrl = '';
+          if (item.main_image_url) {
+            imageUrl = item.main_image_url;
+          } else if (item.image_url) {
+            // Split comma-separated string and take first image
+            const images = item.image_url.split(',').map(img => img.trim());
+            imageUrl = images[0] || '';
           }
-        }));
+          
+          return {
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            subcategory: item.subcategory || '',
+            price: item.price,
+            oldPrice: item.old_price || Math.round(item.price * 1.1),
+            image: imageUrl,
+            details: {
+              description: item.description || '',
+              features: item.features || [],
+              specifications: item.specifications || {}
+            }
+          };
+        });
         
+        console.log('✨ Transformed products:', transformedProducts);
         displayProducts(transformedProducts);
         updateCategories(transformedProducts);
       }
       
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('❌ Error loading products:', error);
       document.getElementById('no-products').classList.remove('hidden');
       document.getElementById('loading-products').classList.add('hidden');
     }
   }
 
   function displayProducts(productsArray) {
+    console.log('🖼️ displayProducts called with:', productsArray ? productsArray.length : 'none');
+    
     const container = document.getElementById('products');
     const loading = document.getElementById('loading-products');
     const noProducts = document.getElementById('no-products');
     
     if (!productsArray || productsArray.length === 0) {
+      console.log('⚠️ No products to display');
       loading.classList.add('hidden');
       noProducts.classList.remove('hidden');
       return;
     }
     
+    console.log('✅ Displaying', productsArray.length, 'products');
     loading.classList.add('hidden');
     container.classList.remove('hidden');
     
@@ -155,6 +175,7 @@
     
     container.innerHTML = featuredProducts.map(p => {
       const discount = getDiscount(p.oldPrice, p.price);
+      console.log('📦 Product:', p.name, 'Image:', p.image);
       
       return `
         <div class="bg-white p-3 rounded shadow hover:shadow-lg transition relative">
@@ -164,7 +185,10 @@
             </span>
           ` : ''}
           <a href="product.html?id=${p.id}">
-            <img src="${p.image}" class="h-32 w-full object-cover mb-2 rounded cursor-pointer hover:opacity-90">
+            <img src="${p.image}" 
+                 alt="${p.name}" 
+                 class="h-32 w-full object-cover mb-2 rounded cursor-pointer hover:opacity-90"
+                 onerror="this.src='https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400'">
             <h3 class="text-sm font-semibold line-clamp-2 h-10 cursor-pointer hover:text-brandBlue">${p.name}</h3>
           </a>
           <p class="text-brandBlue font-bold mt-1">KSh ${p.price.toLocaleString()}</p>
@@ -191,10 +215,12 @@
   }
 
   function updateCategories(productsArray) {
+    console.log('🏷️ updateCategories called');
     const categoriesList = document.getElementById('categories-list');
     if (!categoriesList) return;
     
     const categories = [...new Set(productsArray.map(p => p.category))].filter(Boolean);
+    console.log('📋 Categories found:', categories);
     
     categoriesList.innerHTML = categories.map(cat => `
       <li><a href="category.html?category=${encodeURIComponent(cat)}" class="hover:text-brandGold block">${cat}</a></li>
@@ -211,8 +237,12 @@
     }
   });
 
+  // Debug: Check if scripts are loading
+  console.log('🚀 index.html script loaded');
+  
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM loaded, initializing...');
     loadHomepageProducts();
     updateCartCount();
   });
