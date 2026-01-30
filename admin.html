@@ -162,10 +162,61 @@
             <label class="block text-sm font-semibold mb-1">Description</label>
             <textarea name="description" class="w-full border rounded px-4 py-2"></textarea>
           </div>
+          
+          <!-- UPDATED FEATURES SECTION -->
           <div>
-            <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
-            <textarea name="features" class="w-full border rounded px-4 py-2"></textarea>
+            <label class="block text-sm font-semibold mb-1">Features</label>
+            
+            <!-- Bulk paste section -->
+            <div class="mb-3">
+              <label class="text-xs text-gray-600 mb-1 block">
+                Paste all features at once (one per line, comma-separated, or bullet points):
+              </label>
+              <textarea 
+                id="features-bulk" 
+                placeholder="• Feature 1&#10;• Feature 2&#10;Feature 3&#10;Comma, separated, list"
+                class="w-full border rounded px-4 py-2 text-sm mb-2" 
+                rows="3"
+              ></textarea>
+              <button 
+                type="button" 
+                onclick="parseBulkFeatures()" 
+                class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200"
+              >
+                Parse Features
+              </button>
+            </div>
+            
+            <!-- Features display -->
+            <div class="mb-3">
+              <label class="text-xs text-gray-600 mb-1 block">Features List (<span id="features-count">0</span>):</label>
+              <div id="features-display" class="border rounded p-3 max-h-32 overflow-y-auto text-sm bg-gray-50">
+                <div class="text-gray-400 italic">No features added yet</div>
+              </div>
+            </div>
+            
+            <!-- Individual add -->
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="single-feature" 
+                placeholder="Add single feature" 
+                class="flex-1 border rounded px-4 py-2 text-sm"
+                onkeypress="if(event.key === 'Enter') addSingleFeature()"
+              />
+              <button 
+                type="button" 
+                onclick="addSingleFeature()" 
+                class="bg-brandGold text-white px-3 py-2 rounded text-sm"
+              >
+                Add
+              </button>
+            </div>
+            
+            <!-- Hidden field for form submission -->
+            <input type="hidden" id="features-json" name="features" />
           </div>
+          
           <div>
             <label class="block text-sm font-semibold mb-1">Specs</label>
             <div id="specs-container">
@@ -199,6 +250,66 @@
     </div>
 
   </main>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center border-b p-6">
+      <h2 class="text-2xl font-bold">Edit Product</h2>
+      <button id="close-edit-modal" class="text-2xl hover:text-red-600">&times;</button>
+    </div>
+    
+    <form id="edit-product-form" class="p-6 space-y-4">
+      <input type="hidden" id="edit-product-id" name="id"/>
+      
+      <div>
+        <label class="block text-sm font-semibold mb-1">Name</label>
+        <input type="text" id="edit-name" name="name" required class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Category</label>
+        <input type="text" id="edit-category" name="category" required class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Subcategory</label>
+        <input type="text" id="edit-subcategory" name="subcategory" class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Price</label>
+        <input type="number" id="edit-price" name="price" required class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Old Price</label>
+        <input type="number" id="edit-old-price" name="old_price" class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Description</label>
+        <textarea id="edit-description" name="description" class="w-full border rounded px-4 py-2"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Features (one per line)</label>
+        <textarea id="edit-features" name="features" class="w-full border rounded px-4 py-2"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Specs</label>
+        <div id="edit-specs-container">
+          <!-- Dynamic spec rows -->
+        </div>
+        <button type="button" id="edit-add-spec-btn" class="bg-brandGold text-white px-3 py-1 rounded mt-2">Add Spec</button>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Current Image</label>
+        <img id="edit-current-image" src="" class="h-32 rounded mb-2"/>
+        <label class="block text-sm font-semibold mb-1">New Image (optional)</label>
+        <input type="file" name="image" accept="image/*" class="w-full border rounded px-4 py-2"/>
+      </div>
+      <div class="flex gap-3 pt-4">
+        <button type="submit" class="bg-brandGold text-white px-6 py-2 rounded font-bold">Update Product</button>
+        <button type="button" id="close-edit-modal-2" class="bg-gray-300 text-gray-800 px-6 py-2 rounded">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- ✅ ONLY SCRIPT LOADED -->
