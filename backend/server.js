@@ -9,8 +9,12 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// CORS - Allow your domain
+app.use(cors({
+  origin: ['https://sherrys-wholesalers.com', 'https://www.sherrys-wholesalers.com', 'http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Database connection
@@ -19,11 +23,26 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+// Test database connection
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Database connection error:', err.stack);
+  } else {
+    console.log('✅ Database connected successfully');
+    release();
+  }
+});
+
 // Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+console.log('Cloudinary configured:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY ? '***' : 'MISSING'
 });
 
 // Cloudinary storage for multer
@@ -74,8 +93,8 @@ app.get('/api/products', async (req, res) => {
     const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    console.error('Error fetching products:', error.message);
+    res.status(500).json({ error: 'Failed to fetch products', details: error.message });
   }
 });
 
@@ -91,23 +110,46 @@ app.get('/api/products/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ error: 'Failed to fetch product' });
+    console.error('Error fetching product:', error.message);
+    res.status(500).json({ error: 'Failed to fetch product', details: error.message });
   }
 });
 
 // Add new product with image upload
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
+    console.log('📝 Received product data:', req.body);
+    console.log('📸 Received file:', req.file ? 'Yes' : 'No');
+    
     const { name, category, subcategory, price, old_price, description, features, specifications } = req.body;
     
     if (!req.file) {
+      console.error('❌ No file uploaded');
       return res.status(400).json({ error: 'Image is required' });
     }
 
     const imageUrl = req.file.path;
-    const featuresArray = features ? JSON.parse(features) : [];
-    const specsObject = specifications ? JSON.parse(specifications) : {};
+    console.log('✅ Image uploaded to:', imageUrl);
+    
+    // Parse features and specs safely
+    let featuresArray = [];
+    let specsObject = {};
+    
+    try {
+      featuresArray = features ? JSON.parse(features) : [];
+    } catch (e) {
+      console.warn('⚠️ Error parsing features:', e.message);
+      featuresArray = [];
+    }
+    
+    try {
+      specsObject = specifications ? JSON.parse(specifications) : {};
+    } catch (e) {
+      console.warn('⚠️ Error parsing specifications:', e.message);
+      specsObject = {};
+    }
+
+    console.log('💾 Inserting into database...');
 
     const result = await pool.query(
       `INSERT INTO products (name, category, subcategory, price, old_price, image_url, description, features, specifications)
@@ -116,10 +158,16 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
       [name, category, subcategory, price, old_price, imageUrl, description, featuresArray, specsObject]
     );
 
+    console.log('✅ Product added successfully:', result.rows[0].id);
     res.status(201).json(result.rows[0]);
+    
   } catch (error) {
-    console.error('Error adding product:', error);
-    res.status(500).json({ error: 'Failed to add product' });
+    console.error('❌ Error adding product:', error.message);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to add product', 
+      details: error.message 
+    });
   }
 });
 
@@ -132,9 +180,11 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
     let imageUrl;
     if (req.file) {
       imageUrl = req.file.path;
+      console.log('✅ New image uploaded:', imageUrl);
     } else {
       const existing = await pool.query('SELECT image_url FROM products WHERE id = $1', [id]);
       imageUrl = existing.rows[0]?.image_url;
+      console.log('ℹ️ Keeping existing image');
     }
 
     const featuresArray = features ? JSON.parse(features) : [];
@@ -153,10 +203,11 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    console.log('✅ Product updated:', id);
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ error: 'Failed to update product' });
+    console.error('❌ Error updating product:', error.message);
+    res.status(500).json({ error: 'Failed to update product', details: error.message });
   }
 });
 
@@ -171,10 +222,11 @@ app.delete('/api/products/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    console.log('✅ Product deleted:', id);
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ error: 'Failed to delete product' });
+    console.error('❌ Error deleting product:', error.message);
+    res.status(500).json({ error: 'Failed to delete product', details: error.message });
   }
 });
 
@@ -185,8 +237,8 @@ app.get('/api/categories', async (req, res) => {
     const categories = result.rows.map(row => row.category);
     res.json(categories);
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({ error: 'Failed to fetch categories' });
+    console.error('Error fetching categories:', error.message);
+    res.status(500).json({ error: 'Failed to fetch categories', details: error.message });
   }
 });
 
@@ -201,8 +253,8 @@ app.get('/api/subcategories/:category', async (req, res) => {
     const subcategories = result.rows.map(row => row.subcategory);
     res.json(subcategories);
   } catch (error) {
-    console.error('Error fetching subcategories:', error);
-    res.status(500).json({ error: 'Failed to fetch subcategories' });
+    console.error('Error fetching subcategories:', error.message);
+    res.status(500).json({ error: 'Failed to fetch subcategories', details: error.message });
   }
 });
 
@@ -212,10 +264,11 @@ app.get('/api/init-db', async (req, res) => {
     const fs = require('fs');
     const sql = fs.readFileSync(__dirname + '/database.sql', 'utf8');
     await pool.query(sql);
+    console.log('✅ Database initialized');
     res.json({ message: 'Database initialized successfully' });
   } catch (error) {
-    console.error('Error initializing database:', error);
-    res.status(500).json({ error: 'Failed to initialize database' });
+    console.error('❌ Error initializing database:', error.message);
+    res.status(500).json({ error: 'Failed to initialize database', details: error.message });
   }
 });
 
