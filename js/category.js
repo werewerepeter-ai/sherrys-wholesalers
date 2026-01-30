@@ -1,3 +1,6 @@
+// API Configuration
+const API_URL = 'https://sherrys-backend.onrender.com/api';
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async function() {
 
@@ -29,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         subcategory: item.subcategory || '',
         price: item.price,
         oldPrice: item.old_price || Math.round(item.price * 1.1),
-        image: item.main_image_url || (item.image_url ? item.image_url.split(',')[0] : ''),
+        image: item.main_image_url || (item.image_url ? item.image_url.split(',')[0].trim() : ''),
         details: {
           description: item.description || `${item.name} - High quality product from Sherry's Wholesalers.`,
           features: Array.isArray(item.features) ? item.features : [],
@@ -190,7 +193,8 @@ document.addEventListener('DOMContentLoaded', async function() {
           <div class="relative overflow-hidden rounded mb-3">
             <img src="${p.image || 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400'}" 
                  alt="${p.name}"
-                 class="h-48 w-full object-cover hover:scale-105 transition-transform duration-300">
+                 class="h-48 w-full object-cover hover:scale-105 transition-transform duration-300"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400'">
             ${hasDiscount ? `
               <div class="absolute bottom-0 left-0 bg-red-600 text-white text-xs px-2 py-1">
                 SAVE KSh ${(p.oldPrice - p.price).toLocaleString()}
